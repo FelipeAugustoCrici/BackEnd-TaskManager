@@ -24,6 +24,10 @@ func main() {
 	defer database.Close()
 	log.Println("✓ Banco de dados conectado")
 
+	if err := db.Migrate(database); err != nil {
+		log.Fatalf("Erro ao rodar migrations: %v", err)
+	}
+
 	// ─── Repositórios ─────────────────────────────────────────────────────────
 	entryRepo    := repository.NewEntryRepository(database)
 	settingsRepo := repository.NewSettingsRepository(database)
