@@ -33,17 +33,20 @@ func main() {
 	settingsRepo := repository.NewSettingsRepository(database)
 	authRepo     := repository.NewAuthRepository(database)
 	categoryRepo := repository.NewCategoryRepository(database)
+	timerRepo    := repository.NewTimerRepository(database)
 
 	// ─── Services ─────────────────────────────────────────────────────────────
 	entrySvc    := service.NewEntryService(entryRepo)
 	settingsSvc := service.NewSettingsService(settingsRepo)
 	authSvc     := service.NewAuthService(authRepo)
+	timerSvc    := service.NewTimerService(timerRepo)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
 	entryH    := handler.NewEntryHandler(entrySvc)
 	settingsH := handler.NewSettingsHandler(settingsSvc)
 	authH     := handler.NewAuthHandler(authSvc)
 	categoryH := handler.NewCategoryHandler(categoryRepo)
+	timerH    := handler.NewTimerHandler(timerSvc)
 
 	// ─── Router ───────────────────────────────────────────────────────────────
 	if os.Getenv("APP_ENV") == "production" {
@@ -88,9 +91,18 @@ func main() {
 
 		categories := protected.Group("/categories")
 		{
-			categories.GET("",      categoryH.List)
-			categories.POST("",     categoryH.Create)
+			categories.GET("",        categoryH.List)
+			categories.POST("",       categoryH.Create)
 			categories.DELETE("/:id", categoryH.Delete)
+		}
+
+		timer := protected.Group("/timer")
+		{
+			timer.GET("",       timerH.Get)
+			timer.POST("",      timerH.Start)
+			timer.PATCH("/pause",  timerH.Pause)
+			timer.PATCH("/resume", timerH.Resume)
+			timer.DELETE("",    timerH.Delete)
 		}
 	}
 
